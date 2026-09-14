@@ -7,6 +7,7 @@ qt_standard_project_setup()
 
 qt_add_executable(SweetCrush
     main.cpp
+    tablero.h
 )
 
 target_link_libraries(SweetCrush
