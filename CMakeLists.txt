@@ -11,6 +11,8 @@ qt_add_executable(SweetCrush
     tablero.cpp
     combinaciones.h
     combinaciones.cpp
+    visualizacion.h
+    visualizacion.cpp
 )
 
 target_link_libraries(SweetCrush
