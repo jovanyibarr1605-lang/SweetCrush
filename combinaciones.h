@@ -3,6 +3,6 @@
 
 bool esFichaCombinable(int ficha);
 
-int detectarYEliminarCombinaciones(unsigned char* tablero, int filas, int columnas);
+int detectarYEliminarCombinaciones(unsigned char* tablero, int filas, int columnas, int &combinacionesDetectadas);
 
 #endif

@@ -5,7 +5,7 @@ bool esFichaCombinable(int ficha) {
     return ficha >= 1 && ficha <= 6;
 }
 
-void marcarCombinacionesHorizontales (unsigned char* tablero, int filas, int columnas, unsigned char* marcas) {
+void marcarCombinacionesHorizontales(unsigned char* tablero, int filas, int columnas, unsigned char* marcas, int &combinacionesDetectadas) {
     for (int fila = 0; fila < filas; fila++) {
         int inicio = 0; 
 
@@ -20,6 +20,7 @@ void marcarCombinacionesHorizontales (unsigned char* tablero, int filas, int col
             int longitud = columna - inicio;
 
             if (esFichaCombinable(ficha) && longitud >= 3) {
+                combinacionesDetectadas++;
                 for (int columnaMarcada = inicio; columnaMarcada < columna; columnaMarcada++) {
                     marcas[fila * columnas + columnaMarcada] = 1;
                 }
@@ -30,7 +31,7 @@ void marcarCombinacionesHorizontales (unsigned char* tablero, int filas, int col
     }
 }
 
-void marcarCombinacionesVerticales(unsigned char* tablero, int filas, int columnas, unsigned char* marcas) {
+void marcarCombinacionesVerticales(unsigned char* tablero, int filas, int columnas, unsigned char* marcas, int &combinacionesDetectadas) {
     for (int columna = 0; columna < columnas; columna++) {
         int inicio = 0;
 
@@ -44,8 +45,8 @@ void marcarCombinacionesVerticales(unsigned char* tablero, int filas, int column
 
             int longitud = fila - inicio;
 
-            if (esFichaCombinable(ficha) && longitud >= 3)
-            {
+            if (esFichaCombinable(ficha) && longitud >= 3) {
+                combinacionesDetectadas++;
                 for (int filaMarcada = inicio; filaMarcada < fila; filaMarcada++) {
                     marcas[filaMarcada * columnas + columna] = 1;
                 }
@@ -56,7 +57,7 @@ void marcarCombinacionesVerticales(unsigned char* tablero, int filas, int column
     }
 }
 
-int detectarYEliminarCombinaciones(unsigned char* tablero, int filas, int columnas) {
+int detectarYEliminarCombinaciones(unsigned char* tablero, int filas, int columnas, int &combinacionesDetectadas) {
     int cantidadPosiciones = filas * columnas;
     unsigned char* marcas = new unsigned char[cantidadPosiciones];
 
@@ -64,8 +65,12 @@ int detectarYEliminarCombinaciones(unsigned char* tablero, int filas, int column
         marcas[indice] = 0;
     }
 
-    marcarCombinacionesHorizontales(tablero, filas, columnas, marcas);
-    marcarCombinacionesVerticales(tablero, filas, columnas, marcas);
+    int combinacionesEnEstaRevision = 0;
+
+    marcarCombinacionesHorizontales(tablero, filas, columnas, marcas, combinacionesEnEstaRevision);
+    marcarCombinacionesVerticales(tablero, filas, columnas, marcas, combinacionesEnEstaRevision);
+
+    combinacionesDetectadas += combinacionesEnEstaRevision;
 
     int eliminadas = 0;
 
