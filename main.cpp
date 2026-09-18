@@ -1,14 +1,12 @@
 #include <iostream>
-#include <ctime>
 #include "tablero.h"
 #include "mecanicas.h"
 #include "visualizacion.h"
 
 int main()
 {
-    unsigned int semilla = static_cast<unsigned int>(time(nullptr));
-
     int filas, columnas;
+    unsigned int semilla;
 
     std::cout << "Ingrese numero de filas (minimo 5): ";
     std::cin >> filas;
@@ -24,6 +22,9 @@ int main()
         std::cin >> columnas;
     }
 
+    std::cout << "Ingrese una semilla numerica: ";
+    std::cin >> semilla;
+
     unsigned char* tablero = crearTablero(filas, columnas);
     int capacidadBytes = bytesNecesarios(filas, columnas);
 
@@ -33,93 +34,149 @@ int main()
     int eliminacionesUsuario = 0;
     int fichasEliminadas = 0;
     int combinacionesTotales = 0;
+    int cascadasActuales = 0;
     int movimientosRestantes = 20;
 
     bool jugando = true;
 
     while (jugando && movimientosRestantes > 0)
     {
-        mostrarEstado(filas, columnas, puntaje, eliminacionesUsuario, fichasEliminadas, combinacionesTotales, 0, movimientosRestantes);
+        mostrarTablero(tablero, filas, columnas);
+        mostrarEstado(filas, columnas, puntaje, eliminacionesUsuario, fichasEliminadas, combinacionesTotales, cascadasActuales, movimientosRestantes);
         mostrarMenu();
 
         int opcion;
-        std::cin >> opcion;
-
-        if (opcion == 1) // Seleccionar una ficha
+        if (!(std::cin >> opcion))
         {
-            int f, c;
-            std::cout << "Fila: ";
-            std::cin >> f;
-            std::cout << "Columna: ";
-            std::cin >> c;
-
-            int valorFicha = leerFicha(tablero, f, c, columnas);
-
-            if (valorFicha == 7) // ficha especial
-            {
-                int tipoEstructura, accion, indice;
-                std::cout << "Fila(1) o Columna(2)? ";
-                std::cin >> tipoEstructura;
-                std::cout << "Agregar(1) o Eliminar(2)? ";
-                std::cin >> accion;
-                std::cout << "Indice: ";
-                std::cin >> indice;
-
-                if (tipoEstructura == 1 && accion == 1)
-                {
-                    agregarFila(tablero, filas, columnas, capacidadBytes, indice, semilla);
-                }
-                else if (tipoEstructura == 1 && accion == 2)
-                {
-                    eliminarFila(tablero, filas, columnas, capacidadBytes, indice);
-                    int cascadasTemp = 0;
-                    resolverCascadas(tablero, filas, columnas, fichasEliminadas, combinacionesTotales, cascadasTemp, semilla);
-                }
-                else if (tipoEstructura == 2 && accion == 1)
-                {
-                    agregarColumna(tablero, filas, columnas, capacidadBytes, indice, semilla);
-                }
-                else if (tipoEstructura == 2 && accion == 2)
-                {
-                    eliminarColumna(tablero, filas, columnas, capacidadBytes, indice);
-                    int cascadasTemp = 0;
-                    resolverCascadas(tablero, filas, columnas, fichasEliminadas, combinacionesTotales, cascadasTemp, semilla);
-                }
-            }
-            else if (valorFicha != 0) // ficha normal, no vacia
-            {
-                escribirFicha(tablero, f, c, columnas, 0);
-                eliminacionesUsuario++;
-                fichasEliminadas++;
-
-                // Aplicar gravedad y relleno tras la eliminacion manual
-                aplicarGravedad(tablero, filas, columnas);
-                rellenarEspaciosVacios(tablero, filas, columnas, semilla);
-
-                // Revisar si el relleno genero combinaciones y resolver cascadas
-                int cascadasEstaJugada = 0;
-                resolverCascadas(tablero, filas, columnas, fichasEliminadas, combinacionesTotales, cascadasEstaJugada, semilla);
-            }
-
-            movimientosRestantes--;
-            puntaje = fichasEliminadas * 10; // criterio de puntuacion, ajustar segun se documente
+            jugando = false;
+            break;
         }
-        else if (opcion == 2) // Ver tablero con fichas
+
+        if (opcion == 1)
+        {
+            int fila, columna;
+            std::cout << "Fila: ";
+            std::cin >> fila;
+            std::cout << "Columna: ";
+            std::cin >> columna;
+
+            fila--;
+            columna--;
+
+            if (fila < 0 || fila >= filas || columna < 0 || columna >= columnas)
+            {
+                std::cout << "La posicion indicada no existe." << std::endl;
+            }
+            else
+            {
+                int valorFicha = leerFicha(tablero, fila, columna, columnas);
+
+                if (valorFicha == 7)
+                {
+                    int tipoEstructura, accion;
+                    bool accionRealizada = false;
+                    int eliminadasEstructura = 0;
+
+                    cascadasActuales = 0;
+
+                    std::cout << "Fila(1) o Columna(2)? ";
+                    std::cin >> tipoEstructura;
+                    std::cout << "Agregar(1) o Eliminar(2)? ";
+                    std::cin >> accion;
+
+                    if (tipoEstructura == 1 && accion == 1)
+                    {
+                        accionRealizada = agregarFila(tablero, filas, columnas, capacidadBytes, fila, semilla);
+                    }
+                    else if (tipoEstructura == 1 && accion == 2)
+                    {
+                        if (filas > 5)
+                        {
+                            eliminadasEstructura = eliminarFila(tablero, filas, columnas, capacidadBytes, fila);
+                            accionRealizada = eliminadasEstructura >= 0;
+                        }
+                        else
+                        {
+                            std::cout << "El tablero no puede tener menos de 5 filas." << std::endl;
+                        }
+                    }
+                    else if (tipoEstructura == 2 && accion == 1)
+                    {
+                        accionRealizada = agregarColumna(tablero, filas, columnas, capacidadBytes, columna, semilla);
+                    }
+                    else if (tipoEstructura == 2 && accion == 2)
+                    {
+                        if (columnas > 5)
+                        {
+                            eliminadasEstructura = eliminarColumna(tablero, filas, columnas, capacidadBytes, columna);
+                            accionRealizada = eliminadasEstructura >= 0;
+                        }
+                        else
+                        {
+                            std::cout << "El tablero no puede tener menos de 5 columnas." << std::endl;
+                        }
+                    }
+                    else
+                    {
+                        std::cout << "La opcion estructural no es valida." << std::endl;
+                    }
+
+                    if (accionRealizada)
+                    {
+                        if (eliminadasEstructura > 0)
+                        {
+                            eliminacionesUsuario++;
+                            fichasEliminadas += eliminadasEstructura;
+                        }
+
+                        resolverCascadas(tablero, filas, columnas, fichasEliminadas, combinacionesTotales, cascadasActuales, semilla);
+
+                        movimientosRestantes--;
+                        puntaje = fichasEliminadas * 10;
+                    }
+                }
+                else if (valorFicha >= 1 && valorFicha <= 6)
+                {
+                    cascadasActuales = 0;
+
+                    escribirFicha(tablero, fila, columna, columnas, 0);
+                    eliminacionesUsuario++;
+                    fichasEliminadas++;
+
+                    aplicarGravedad(tablero, filas, columnas);
+                    rellenarEspaciosVacios(tablero, filas, columnas, semilla);
+                    resolverCascadas(tablero, filas, columnas, fichasEliminadas, combinacionesTotales, cascadasActuales, semilla);
+
+                    movimientosRestantes--;
+                    puntaje = fichasEliminadas * 10;
+                }
+                else
+                {
+                    std::cout << "La posicion esta vacia." << std::endl;
+                }
+            }
+        }
+        else if (opcion == 2)
         {
             mostrarTablero(tablero, filas, columnas);
         }
-        else if (opcion == 3) // Ver tablero en binario
+        else if (opcion == 3)
         {
             mostrarBits(tablero, filas, columnas);
         }
-        else if (opcion == 4) // Salir
+        else if (opcion == 4)
         {
             jugando = false;
+        }
+        else
+        {
+            std::cout << "La opcion no es valida." << std::endl;
         }
     }
 
     std::cout << "--- Juego terminado ---" << std::endl;
-    mostrarEstado(filas, columnas, puntaje, eliminacionesUsuario, fichasEliminadas, combinacionesTotales, 0, movimientosRestantes);
+    mostrarTablero(tablero, filas, columnas);
+    mostrarEstado(filas, columnas, puntaje, eliminacionesUsuario, fichasEliminadas, combinacionesTotales, cascadasActuales, movimientosRestantes);
 
     liberarTablero(tablero);
 

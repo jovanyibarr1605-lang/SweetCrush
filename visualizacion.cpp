@@ -46,7 +46,7 @@ void mostrarFicha(int ficha) {
 }
 
 void mostrarTablero(unsigned char* tablero, int filas, int columnas) {
-    cout << "\n    ";
+    cout << "\n   ";
 
     for (int columna = 0; columna < columnas; columna++){
         if (columna + 1 < 10) {
