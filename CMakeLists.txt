@@ -9,10 +9,10 @@ qt_add_executable(SweetCrush
     main.cpp
     tablero.h
     tablero.cpp
-    combinaciones.h
-    combinaciones.cpp
-    visualizacion.h
-    visualizacion.cpp
+    combinaciones.cpp combinaciones.h
+    mecanicas.cpp mecanicas.h
+    visualizacion.cpp visualizacion.h
+
 )
 
 target_link_libraries(SweetCrush
