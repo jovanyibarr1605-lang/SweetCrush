@@ -38,10 +38,19 @@ int main()
     int movimientosRestantes = 20;
 
     bool jugando = true;
+    bool modoBinario = false;
 
     while (jugando && movimientosRestantes > 0)
     {
-        mostrarTablero(tablero, filas, columnas);
+        if (modoBinario)
+        {
+            mostrarBits(tablero, filas, columnas);
+        }
+        else
+        {
+            mostrarTablero(tablero, filas, columnas);
+        }
+
         mostrarEstado(filas, columnas, puntaje, eliminacionesUsuario, fichasEliminadas, combinacionesTotales, cascadasActuales, movimientosRestantes);
         mostrarMenu();
 
@@ -158,11 +167,11 @@ int main()
         }
         else if (opcion == 2)
         {
-            mostrarTablero(tablero, filas, columnas);
+            modoBinario = false;
         }
         else if (opcion == 3)
         {
-            mostrarBits(tablero, filas, columnas);
+            modoBinario = true;
         }
         else if (opcion == 4)
         {
@@ -175,7 +184,16 @@ int main()
     }
 
     std::cout << "--- Juego terminado ---" << std::endl;
-    mostrarTablero(tablero, filas, columnas);
+
+    if (modoBinario)
+    {
+        mostrarBits(tablero, filas, columnas);
+    }
+    else
+    {
+        mostrarTablero(tablero, filas, columnas);
+    }
+
     mostrarEstado(filas, columnas, puntaje, eliminacionesUsuario, fichasEliminadas, combinacionesTotales, cascadasActuales, movimientosRestantes);
 
     liberarTablero(tablero);

@@ -1,4 +1,5 @@
 #include"tablero.h"
+
 int bytesNecesarios(int filas, int columnas)
 {
     int totalBits = 3 * filas * columnas;

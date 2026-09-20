@@ -1,5 +1,6 @@
 #ifndef TABLERO_H
 #define TABLERO_H
+
 // Crea un tablero de 'filas' x 'columnas' y reserva la memoria necesaria
 unsigned char* crearTablero(int filas, int columnas);
 // Calcula la cantidad minima de bytes necesarios para el tablero
